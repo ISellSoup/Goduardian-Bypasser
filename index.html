@@ -3,15 +3,19 @@
 <script>
 let w = open("")
 w.document.body.margin = 0
-w.document.body.innerHTML += `
-<Button onclick='document.getElementById("frame").src = document.getElementById("input").value'>
-Set
-</Button>
-<Input type='url' id='input'>
-<iframe src='https://scratch.mit.edu/projects/588256156/embed' style='height: 100%; width: 100%; margin:0;' id='frame'></iframe>
-`
+w.document.body.innerHTML += document.getElementById("Content").innerHTML
+close()
 </script>
+<body>
+    <div id="Content" hidden="true">
+        <Button onclick='document.getElementById("frame").src = document.getElementById("input").value'>
+        Set
+        </Button>
+        <Input type='url' id='input'>
+        <iframe src='https://scratch.mit.edu/projects/588256156/embed' style='height: 100%; width: 100%; margin:0;' id='frame'></iframe>
+    </div>
+    <h1>
+        Hello
+    </h1>
+</body>
 </html>
-https://scratch.mit.edu/projects/1003880399/
-https://scratch.mit.edu/projects/792944476/
-https://codebeautify.org/htmlviewer
