@@ -106,15 +106,18 @@ function isValidUrl(url) {
     return false;
   }
 }
-function RefreshContent() {
+function LoadContent() {
     const frame = document.getElementById('frame');
     const refresh = document.getElementById("refresh");
     const input = document.getElementById("input");
 
-    input.value = frame.src;
     frame.src = input.value;
     const rotation = Number(refresh.style.rotate.replace("deg",""));
     refresh.style.rotate = `${360+rotation}deg`;
+}
+function RefreshContent() {
+    document.getElementById("input").value = document.getElementById('frame').src;
+    LoadContent()
 }
 function UrlInputKeyDown(Key) {
     if (Key.code === "Enter") {
@@ -122,10 +125,10 @@ function UrlInputKeyDown(Key) {
         if ((!isValidUrl(input.value)) && (input.value.indexOf(".") != -1)) {
             input.value = "http://"+input.value;
         }
-        if (input.value.indexOf(".") == 1 || input.value.length==0) {
+        if (input.value.indexOf(".") == 0 || input.value.length==0) {
             input.value = "https://standofevil1555.sevalla.page/";
         }
-        RefreshContent();
+        LoadContent();
     }
 }
 </script>
