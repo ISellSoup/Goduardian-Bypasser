@@ -97,8 +97,13 @@ document.addEventListener('click', function() {
 });
 </script>
 <script id="definitions" type="text/javascript">
-function sleep(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
+function isValidUrl(url) {
+  try {
+    new URL(url);
+    return true;
+  } catch (error) {
+    return false;
+  }
 }
 function RefreshContent() {
     let frame = document.getElementById('frame');
@@ -110,9 +115,9 @@ function RefreshContent() {
 function UrlInputKeyDown(Key) {
     if (Key.code === "Enter") {
         const element = document.getElementById('input')
-        //if (!element.value.startsWith("http")) {
-        //    element.value = "http://"+element.value
-        //}
+        if ((!isValidUrl(element.value)) && (element.value.indexOf(".") != -1)) {
+            element.value = "http://"+element.value
+        }
         RefreshContent()
     }
 }
@@ -121,7 +126,7 @@ function UrlInputKeyDown(Key) {
     <div id="Content" hidden="true">
         <div class="Navbar">
             <button class="flat-button" id="refresh" onclick="RefreshContent()">&#x21bb;</button>
-            <Input type="url" id="input" onkeydown="UrlInputKeyDown(event)">
+            <Input type="url" id="input" onkeydown="UrlInputKeyDown(event)" value="https://mz0cv-5uszw.sevalla.page">
             <!--<div id="tabs">
                 <div>tab 1eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee</div>
                 <div>tab 1eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee</div>
@@ -137,7 +142,7 @@ function UrlInputKeyDown(Key) {
                 <div>tab 2</div>
             </div>-->
         </div>
-        <iframe src='https://scratch.mit.edu/projects/588256156/embed' id="frame"></iframe>
+        <iframe src='https://mz0cv-5uszw.sevalla.page' id="frame" onload="document.getElementById('input').value = event.target.src"></iframe>
     </div>
     <h1>
         Hello! Click anywhere to continue
