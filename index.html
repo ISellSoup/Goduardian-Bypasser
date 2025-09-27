@@ -106,19 +106,25 @@ function isValidUrl(url) {
   }
 }
 function RefreshContent() {
-    let frame = document.getElementById('frame');
-    let refresh = document.getElementById("refresh")
-    frame.src = document.getElementById('input').value; 
-    const rotation = Number(refresh.style.rotate.replace("deg",""))
+    const frame = document.getElementById('frame');
+    const refresh = document.getElementById("refresh");
+    const input = document.getElementById("input");
+
+    input.value = frame.src;
+    frame.src = input.value;
+    const rotation = Number(refresh.style.rotate.replace("deg",""));
     refresh.style.rotate = `${360+rotation}deg`;
 }
 function UrlInputKeyDown(Key) {
     if (Key.code === "Enter") {
-        const element = document.getElementById('input')
-        if ((!isValidUrl(element.value)) && (element.value.indexOf(".") != -1)) {
-            element.value = "http://"+element.value
+        //Validate URL
+        if ((!isValidUrl(input.value)) && (input.value.indexOf(".") != -1)) {
+            input.value = "http://"+input.value;
         }
-        RefreshContent()
+        if (input.value.indexOf(".") == 1 || input.value.length==0) {
+            input.value = "https://mz0cv-5uszw.sevalla.page";
+        }
+        RefreshContent();
     }
 }
 </script>
@@ -142,7 +148,7 @@ function UrlInputKeyDown(Key) {
                 <div>tab 2</div>
             </div>-->
         </div>
-        <iframe src='https://mz0cv-5uszw.sevalla.page' id="frame" onload="document.getElementById('input').value = event.target.src"></iframe>
+        <iframe src='https://mz0cv-5uszw.sevalla.page' id="frame" onload="document.getElementById('input').value = event.target.src;"></iframe>
     </div>
     <h1>
         Hello! Click anywhere to continue
