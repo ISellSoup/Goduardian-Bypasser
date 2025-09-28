@@ -131,6 +131,9 @@ let contentFallback;
 let refresh;
 let input;
 let isStaticContent = false;
+let bustCache = false;
+let originalURL = "";
+let cacheBustedURL = "";
 let staticSrc = "";
 
 let unloadCallback = false;
@@ -213,7 +216,16 @@ function LoadContent() {
     }
     frame.addEventListener("load", ContentLoaded);
 
-    frame.src = input.value;
+    if (bustCache) {
+        bustCache = false;
+        originalURL = input.value;
+        const urlObj = new URL(originalURL);
+        urlObj.searchParams.set(`cachebust-${Date.now()}`, Math.random().toString(36));
+        cacheBustedURL = urlObj.toString();
+        frame.src = cacheBustedURL;
+    } else {
+        frame.src = input.value;
+    }
     showStopLoad();
 }
 
@@ -256,9 +268,11 @@ function StopLoadContent() {
 
 function RefreshContent() {
     console.log("refresh")
+    bustCache = true;
+
     if (isStaticContent) {
         frame.src = staticSrc
-    } else {
+    } else if (frame.src !== cacheBustedURL) {
         input.value = frame.src;
     }
     LoadContent()
@@ -266,14 +280,16 @@ function RefreshContent() {
 
 function ContentLoaded() {
     console.log("Loaded");
-    
-    if (!isStaticContent) {
-        input.value = frame.src;
-    }
-    
     showRefresh();
     const rotation = Number(refresh.style.rotate.replace("deg","") || 0);
-    refresh.style.rotate = `${360 + rotation}deg`;
+
+    requestAnimationFrame(() => {
+        refresh.style.rotate = `${rotation + 360}deg`;
+    });
+    
+    if ((!isStaticContent) && (frame.src !== cacheBustedURL)) {
+        input.value = frame.src;
+    }
 
     try {
         frame.contentWindow.focus();
@@ -329,7 +345,7 @@ function UrlInputKeyDown(Key) {
     <h1>
         Hello! Click anywhere to continue
         <br>
-        u2
+        u3
     </h1>
 </body>
 </html>
