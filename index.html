@@ -1,18 +1,91 @@
 <!DOCTYPE html>
 <html>
 <script>
-let w = open("")
-w.document.body.margin = 0
-w.document.body.innerHTML += document.getElementById("Content").innerHTML
-window.close()
+document.addEventListener('click', function() {
+    let w = open("")
+    const definitions = w.document.createElement("script")
+    definitions.textContent = document.getElementById("definitions").innerHTML
+    w.document.head.appendChild(definitions)
+    w.document.head.innerHTML += document.head.innerHTML
+    w.document.body.innerHTML += document.getElementById("Content").innerHTML
+    close()
+});
+</script>
+<script id="definitions" type="text/javascript">
+const frame = document.getElementById('frame');
+const refresh = document.getElementById("refresh");
+const stopLoad = document.getElementById("stopLoad");
+const input = document.getElementById("input");
+
+console.log(frame, refresh, stopLoad, input, document.innerHTML);
+
+function isValidUrl(url) {
+  try {
+    new URL(url);
+    return true;
+  } catch (error) {
+    return false;
+  }
+}
+function LoadContent() {
+    frame.src = input.value;
+    refresh.hidden = true;
+    stopLoad.hidden = false;
+}
+function RefreshContent() {
+    input.value = frame.src;
+    LoadContent();
+}
+function StopLoad() {
+    frame.contentWindow.stop();
+    frame.innerHTML = "";
+    stopLoad.hidden = true;
+    refresh.hidden = false;
+}
+function LoadedCallback() {
+    input.value = frame.src;
+    stopLoad.hidden = true;
+    refresh.hidden = false;
+    const rotation = Number(refresh.style.rotate.replace("deg",""));
+    refresh.style.rotate = `${360+rotation}deg`;
+}
+function UrlInputKeyDown(Key) {
+    if (Key.code === "Enter") {
+        //Validate URL
+        if ((!isValidUrl(input.value)) && (input.value.indexOf(".") != -1)) {
+            input.value = "http://"+input.value;
+        }
+        if (input.value.indexOf(".") == 0 || input.value.length==0) {
+            input.value = "https://standofevil1555.sevalla.page/";
+        }
+        LoadContent();
+    }
+}
+
+
 </script>
 <body>
     <div id="Content" hidden="true">
-        <Button onclick='document.getElementById("frame").src = document.getElementById("input").value'>
-        Set
-        </Button>
-        <Input type='url' id='input'>
-        <iframe src='https://scratch.mit.edu/projects/588256156/embed' style='height: 100%; width: 100%; margin:0;' id='frame'></iframe>
+        <div class="Navbar">
+            <button class="flat-button" id="refresh" onclick="RefreshContent();">&#x21bb;</button>
+            <button class="flat-button" id="stopLoad" hidden="true" onclick="StopLoad();">&#x21bb;</button>
+            <Input type="url" id="input" onkeydown="UrlInputKeyDown(event)" value="https://standofevil1555.sevalla.page/">
+            <!--<div id="tabs">
+                <div>tab 1eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee</div>
+                <div>tab 1eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee</div>
+                <div>tab 1eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee</div>
+                <div>tab 1eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee</div>
+                <div>tab 1eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee</div>
+                <div>tab 1eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee</div>
+                <div>tab 1eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee</div>
+                <div>tab 1eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee</div>
+                <div>tab 1eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee</div>
+                <div>tab 2</div>
+                <div>tab 2</div>
+                <div>tab 2</div>
+            </div>-->
+        </div>
+        <iframe src="https://standofevil1555.sevalla.page/" id="frame"></iframe>
     </div>
     <h1>
         Hello
