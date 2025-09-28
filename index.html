@@ -10,7 +10,10 @@
             margin: 0;
             --border-width: 2.5px;
         }
-        #frame {
+        h1 {
+            text-align: center;
+        }
+        #frame, #staticFrame, #contentFallback {
             border: none;
             margin: 0;
             padding: 0;
@@ -18,6 +21,10 @@
             height: 100vh;
         }
         .flat-button {
+            -webkit-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+
             text-align: center;
             background-color: transparent;
             color: white;
@@ -86,6 +93,18 @@
             padding: 0.5px;
             border-radius: var(--scrollbar-size);
         }
+        /* Overlay shown when we can't preserve cross-origin iframe content */
+        #frozenOverlay {
+            position: absolute;
+            inset: 40px 0 0 0; /* below navbar */
+            display: none;
+            justify-content: center;
+            align-items: center;
+            background: rgba(0,0,0,0.6);
+            color: white;
+            z-index: 9998;
+            font-size: 1.1rem;
+        }
     </style>
 </head>
 <script>
@@ -107,8 +126,14 @@ document.addEventListener('click', function() {
 if (window.opener) {
 
 let frame;
+let staticFrame;
+let contentFallback;
 let refresh;
 let input;
+let isStaticContent = false;
+let staticSrc = "";
+
+let unloadCallback = false;
 
 if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", init);
@@ -117,10 +142,58 @@ if (document.readyState === "loading") {
 }
 
 function init() {
-    console.log("Loaded");
-    frame = document.getElementById('frame');
+    frame = document.getElementById("frame");
+    staticFrame = document.getElementById("staticFrame");
+    contentFallback = document.getElementById("contentFallback")
     refresh = document.getElementById("refresh");
     input = document.getElementById("input");
+
+    frame.contentWindow.addEventListener("unload", function(){
+        if (unloadCallback) {
+            console.log("unload");
+            showStopLoad()
+        } else {
+            unloadCallback = true;
+        }
+    });
+    staticFrame.contentWindow.addEventListener("unload", function(){
+        if (unloadCallback) {
+            showDynamicContent()
+            frame.src = staticFrame.src
+            console.log("unload static");
+        }
+    });
+}
+
+function showRefresh() {
+    refresh.hidden = false;
+    stopLoad.hidden = true;
+}
+
+function showStopLoad() {
+    refresh.hidden = true;
+    stopLoad.hidden = false;
+}
+
+function showDynamicContent() {
+    staticFrame.hidden = true;
+    frame.hidden = false;
+    contentFallback.hidden = true;
+    isStaticContent = false;
+}
+
+function showStaticContent() {
+    staticFrame.hidden = false;
+    frame.hidden = true;
+    contentFallback.hidden = true;
+    isStaticContent = true;
+}
+
+function showFallbackContent() {
+    staticFrame.hidden = true;
+    frame.hidden = true;
+    contentFallback.hidden = false;
+    isStaticContent = true;
 }
 
 function isValidUrl(url) {
@@ -131,19 +204,82 @@ function isValidUrl(url) {
     return false;
   }
 }
+
 function LoadContent() {
-    //const frame = document.getElementById('frame');
-    //const refresh = document.getElementById("refresh");
-    //const input = document.getElementById("input");
-    
+    showDynamicContent()
+    // remove previous listener on the iframe element if present
+    if (typeof loadEventListener !== "undefined" && loadEventListener) {
+        frame.removeEventListener("load", ContentLoaded);
+    }
+    frame.addEventListener("load", ContentLoaded);
+
     frame.src = input.value;
-    const rotation = Number(refresh.style.rotate.replace("deg",""));
-    refresh.style.rotate = `${360+rotation}deg`;
+    showStopLoad();
 }
+
+function StopLoadContent() {
+    // Primary attempt: instruct the iframe's window to stop loading.
+    try {
+        if (frame && frame.contentWindow) {
+            frame.contentWindow.stop();
+            showRefresh();
+            return;
+        }
+    } catch (e) {
+        // Cross-origin access may throw when trying to call stop()
+        console.warn('frame.contentWindow.stop() threw:', e);
+    }
+
+    // Fallback for same-origin: capture current DOM into the staticFrame using srcdoc
+    try {
+        // Accessing document will throw for cross-origin
+        staticSrc = frame.src;
+        const docHtml = frame.contentWindow.document.documentElement.outerHTML;
+        staticFrame.srcdoc = docHtml;
+        showStaticContent();
+        frame.src = 'about:blank';
+        showRefresh();
+        return;
+    } catch (e) {
+        console.warn('Same-origin snapshot failed (probably cross-origin):', e);
+    }
+
+    // Last-resort visual fallback: show a frozen overlay
+    try {
+        frame.src = 'about:blank';
+        showFallbackContent()
+        showRefresh();
+    } catch (e) {
+        console.warn('Cross-origin fallback failed:', e);
+    }
+}
+
 function RefreshContent() {
-    document.getElementById("input").value = document.getElementById('frame').src;
+    console.log("refresh")
+    if (isStaticContent) {
+        frame.src = staticSrc
+    } else {
+        input.value = frame.src;
+    }
     LoadContent()
 }
+
+function ContentLoaded() {
+    console.log("Loaded");
+    
+    if (!isStaticContent) {
+        input.value = frame.src;
+    }
+    
+    showRefresh();
+    const rotation = Number(refresh.style.rotate.replace("deg","") || 0);
+    refresh.style.rotate = `${360 + rotation}deg`;
+
+    try {
+        frame.contentWindow.focus();
+    } catch (e) {}
+}
+
 function UrlInputKeyDown(Key) {
     if (Key.code === "Enter") {
         //Validate URL
@@ -163,7 +299,7 @@ function UrlInputKeyDown(Key) {
     <div id="Content" hidden="true">
         <div class="Navbar">
             <button class="flat-button" id="refresh" onclick="RefreshContent()">&#x21bb;</button>
-            <button class="flat-button" id="stopLoad" onclick="RefreshContent()">x</button>
+            <button class="flat-button" id="stopLoad" onclick="StopLoadContent()" hidden="true">x</button>
             <Input type="url" id="input" onkeydown="UrlInputKeyDown(event)" value="https://standofevil1555.sevalla.page/">
             <!--<div id="tabs">
                 <div>tab 1eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee</div>
@@ -180,7 +316,15 @@ function UrlInputKeyDown(Key) {
                 <div>tab 2</div>
             </div>-->
         </div>
-        <iframe src="https://standofevil1555.sevalla.page/" id="frame" onload="document.getElementById('input').value = event.target.src;"></iframe>
+        <iframe src="https://standofevil1555.sevalla.page/" id="frame"></iframe>
+        <iframe id="staticFrame" hidden="true"></iframe>
+        <div id="contentFallback" hidden="true">
+            <h1>
+                Access denied to embedded page content
+                <br>
+                :(
+            </h1>
+        </div>
     </div>
     <h1>
         Hello! Click anywhere to continue
