@@ -151,6 +151,9 @@ function init() {
     refresh = document.getElementById("refresh");
     input = document.getElementById("input");
 
+    // Ensure the newest version of the site is shown
+    RefreshContent();
+
     frame.contentWindow.addEventListener("unload", function(){
         if (unloadCallback) {
             console.log("unload");
