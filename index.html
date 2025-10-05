@@ -125,19 +125,17 @@
     </style>
 </head>
 <script>
-const ParentWindow = true
-
 function openPopup() {
+    try {
     let w = open("")
-
-    w.document.head.innerHTML += document.head.innerHTML
     w.document.body.innerHTML += document.getElementById("Content").innerHTML
-
+    w.document.head.innerHTML += document.head.innerHTML
     const definitions = w.document.createElement("script")
     definitions.textContent = document.getElementById("definitions").innerHTML
     w.document.head.appendChild(definitions)
     w.focus()
     close()
+    } catch (e) {}
 }
 
 document.addEventListener("click",openPopup,{once:true});
@@ -162,7 +160,7 @@ if (document.readyState === "loading") {
 function init() {
     document.getElementById('info').hidden=false; 
     document.getElementById('message').innerHTML+=message;
-    openPopup();
+    if (window.self === window.top) {openPopup();}
 }
 
 </script>
