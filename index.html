@@ -169,6 +169,7 @@ function init() {
 <script id="definitions" type="text/javascript">
 if (window.opener) {
 
+const liveUrl = "https://standofevil15555.sevalla.page/";
 let frame;
 let staticFrame;
 let contentFallback;
@@ -179,7 +180,6 @@ let bustCache = false;
 let originalURL = "";
 let cacheBustedURL = "";
 let staticSrc = "";
-
 let unloadCallback = false;
 
 if (document.readyState === "loading") {
@@ -196,6 +196,7 @@ function init() {
     refresh = document.getElementById("refresh");
     input = document.getElementById("input");
 
+    frame.src = liveUrl;
     // Ensure the newest version of the site is shown
     RefreshContent();
 
@@ -351,7 +352,7 @@ function UrlInputKeyDown(Key) {
             input.value = "http://"+input.value;
         }
         if (input.value.indexOf(".") == 0 || input.value.length==0) {
-            input.value = "https://standofevil1555.sevalla.page/";
+            input.value = liveUrl;
         }
         LoadContent();
     }
@@ -364,7 +365,7 @@ function UrlInputKeyDown(Key) {
         <div class="Navbar">
             <button class="flat-button" id="refresh" onclick="RefreshContent()">&#x21bb;</button>
             <button class="flat-button" id="stopLoad" onclick="StopLoadContent()" hidden="true">x</button>
-            <Input type="url" id="input" onkeydown="UrlInputKeyDown(event)" value="https://standofevil1555.sevalla.page/">
+            <Input type="url" id="input" onkeydown="UrlInputKeyDown(event)" value="">
             <!--<div id="tabs">
                 <div>tab 1eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee</div>
                 <div>tab 1eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee</div>
@@ -404,7 +405,7 @@ function UrlInputKeyDown(Key) {
                 </svg>
             </button>
         </div>
-        <iframe src="https://standofevil1555.sevalla.page/" id="frame"></iframe>
+        <iframe src="" id="frame"></iframe>
         <iframe id="staticFrame" hidden="true"></iframe>
         <div id="contentFallback" hidden="true">
             <h1>
